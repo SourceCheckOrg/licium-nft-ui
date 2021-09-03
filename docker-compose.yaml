@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  ui:
+    build: .
+    image: sourcecheck/licium-nft-ui
+    container_name: licium-nft-ui
+    env_file: 
+      - .env.build
+      
+networks:
+  default:
+    external:
+      name: webproxy
