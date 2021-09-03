@@ -12,8 +12,12 @@ const CLASSES_MOBILE_TEXT_NORMAL = 'text-gray-300 block hover:bg-gray-700 hover:
 
 const menuItems = [
   {
-    label: 'About',
-    href: '/about'
+    label: 'Mint NFT',
+    href: '/'
+  },
+  {
+    label: 'License NFT',
+    href: '/license'
   }
 ]
 
@@ -58,7 +62,9 @@ export default function NavBar() {
               </button>
             </div>
             <div className="flex-shrink-0 flex items-center">
-              <span className="text-white text-2xl font-thin widest mr-8">Licium Protocol</span>
+              <span className="text-white text-2xl font-thin widest mr-8">
+                <Link href="/">Licium Protocol</Link>
+              </span>
             </div>
             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               { renderMenuItems(router.pathname, false) }
