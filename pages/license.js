@@ -28,6 +28,10 @@ export default function License() {
   const [contentId, setContentId] = useState("");
   const [dataId, setDataId] = useState("");
   const [instanceId, setInstanceId] = useState("");
+  const [resMetaId, setResMetaId] = useState("");
+  const [resContentId, setResContentId] = useState("");
+  const [resDataId, setResDataId] = useState("");
+  const [resInstanceId, setResInstanceId] = useState("");
   const [tophash, setTophash] = useState("");
   const [licenseUrl, setLicenseUrl] = useState("");
   const [price, setPrice] = useState("");
@@ -52,6 +56,10 @@ export default function License() {
     setContentId("");
     setDataId("");
     setInstanceId("");
+    setResMetaId("");
+    setResContentId("");
+    setResDataId("");
+    setResInstanceId("");
     setTophash("");
     setLicenseUrl("");
     setPrice("");
@@ -98,8 +106,12 @@ export default function License() {
         setMediaPath(result.image);
         setLicenseUrl(result.license_url);
         setPrice(adjustPrice(result.license_price.amount))
-        setSuccessMsg('NFT found! You can license it!');
+        setSuccessMsg('NFT found! You can license the content!');
         setTimeout(() => setSuccessMsg(null), 3000);
+        setResMetaId(result.meta_id);
+        setResContentId(result.content_id);
+        setResDataId(result.data_id);
+        setResInstanceId(result.instance_id);
       } else {
         setErrorMsg('No NFT found with this image!');
         setTimeout(() => setErrorMsg(null), 5000);
@@ -126,6 +138,10 @@ export default function License() {
     setContentId("");
     setDataId("");
     setInstanceId("");
+    setResMetaId("");
+    setResContentId("");
+    setResDataId("");
+    setResInstanceId("");
     setTophash("");
     setLicenseUrl("");
     setPrice("");
@@ -134,6 +150,29 @@ export default function License() {
 
   function canLicense() {
     return connectedWallet && tokenId && licenseUrl && price;
+  }
+
+  function getBorderColor(code) {
+    if (code === "metaId") {
+      if (!resMetaId) return "border-gray-300"
+      if (resMetaId === metaId) return "border-green-300";
+      return "border-red-500";
+    }
+    if (code === "contentId") {
+      if (!resContentId) return "border-gray-300"
+      if (resContentId === contentId) return "border-green-300";
+      return "border-red-500";
+    }
+    if (code === "dataId") {
+      if (!resDataId) return "border-gray-300"
+      if (resDataId === dataId) return "border-green-300";
+      return "border-red-500";
+    }
+    if (code === "instanceId") {
+      if (!resInstanceId) return "border-gray-300"
+      if (resInstanceId === instanceId) return "border-green-300";
+      return "border-red-500";
+    }
   }
 
   const onSubmit = useCallback(async () => {
@@ -272,7 +311,7 @@ export default function License() {
                           type="text"
                           value={metaId}
                           disabled
-                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('metaId')} rounded-md`}
                         />
                       </div>
                     </div>
@@ -285,7 +324,7 @@ export default function License() {
                           type="text"
                           value={contentId}
                           disabled
-                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('contentId')} rounded-md`}
                         />
                       </div>
                     </div>
@@ -298,7 +337,7 @@ export default function License() {
                           type="text"
                           value={dataId}
                           disabled
-                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('dataId')} rounded-md`}
                         />
                       </div>
                     </div>
@@ -311,7 +350,66 @@ export default function License() {
                           type="text"
                           value={instanceId}
                           disabled
-                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('instanceId')} rounded-md`}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+                { resContentId && (
+                  <>
+                    <div className="sm:col-span-8 block text-sm font-bold text-gray-700">
+                      <span>Resolved NFT ISCC Codes</span>
+                    </div>
+                    <div className="sm:col-span-2 text-xs">
+                      <label htmlFor="resMetaId" className="block text-sm font-medium text-gray-700">Meta-Code</label>
+                      <div className="mt-1">
+                        <input 
+                          id="resMetaId"
+                          name="resMetaId"
+                          type="text"
+                          value={resMetaId}
+                          disabled
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('metaId')} rounded-md`}
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="resContentId" className="block text-sm font-medium text-gray-700">Content-Code</label>
+                      <div className="mt-1">
+                        <input 
+                          id="resContentId"
+                          name="resContentId"
+                          type="text"
+                          value={resContentId}
+                          disabled
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('contentId')} rounded-md`}
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="resDataId" className="block text-sm font-medium text-gray-700">Data-Code</label>
+                      <div className="mt-1">
+                        <input 
+                          id="resDataId"
+                          name="resDataId"
+                          type="text"
+                          value={resDataId}
+                          disabled
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('dataId')} rounded-md`}
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="resInstanceId" className="block text-sm font-medium text-gray-700">Instance-Code</label>
+                      <div className="mt-1">
+                        <input 
+                          id="resInstanceId"
+                          name="resInstanceId"
+                          type="text"
+                          value={resInstanceId}
+                          disabled
+                          className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm ${getBorderColor('instanceId')} rounded-md`}
                         />
                       </div>
                     </div>
