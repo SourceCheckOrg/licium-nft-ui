@@ -23,16 +23,16 @@ const ipfsClient = create(`${IPFS_BASE_URL}${IPFS_API}`);
 // license offer options
 const licenseOptions = [
   {
-    name: 'Social Sharing',
-    url: 'https://smartlicense.coblo.net/smartlicense/social/'
+    name: 'Social Sharing License',
+    url: 'https://license.sourcecheck.org/social.html'
   },
   {
     name: 'B2C Standard License',
-    url: 'https://smartlicense.coblo.net/smartlicense/b2c/'
+    url: 'https://license.sourcecheck.org/b2c.html'
   },
   {
-    name: 'Physical reproduction',
-    url: 'https://smartlicense.coblo.net/smartlicense/physical/'
+    name: 'Physical Reproduction License',
+    url: 'https://license.sourcecheck.org/physical.html'
   }
 ]
 
