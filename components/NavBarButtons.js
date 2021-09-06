@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { useWallet, WalletStatus } from '@terra-money/wallet-provider';
 
-
-
 export default function NavBarButtons() {
   const { 
     status, network, wallets, availableConnectTypes, 

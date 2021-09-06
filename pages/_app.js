@@ -1,6 +1,4 @@
 import '../styles/global.css'
-import { SWRConfig } from 'swr';
-import { fetcher } from '../lib/api';
 import { StaticWalletProvider, WalletProvider } from '@terra-money/wallet-provider';
 import React from 'react';
 
@@ -23,20 +21,16 @@ const walletConnectChainIds = {
 
 function MyApp({ Component, pageProps }) {
   return typeof window !== 'undefined' ? (
-    <SWRConfig value={{ fetcher: fetcher }} >
-      <WalletProvider
-        defaultNetwork={mainnet}
-        walletConnectChainIds={walletConnectChainIds}
-      >
-        <Component {...pageProps} />
-      </WalletProvider>
-    </SWRConfig>
+    <WalletProvider
+      defaultNetwork={mainnet}
+      walletConnectChainIds={walletConnectChainIds}
+    >
+      <Component {...pageProps} />
+    </WalletProvider>
   ) : (
-    <SWRConfig value={{ fetcher: fetcher }} >
-      <StaticWalletProvider defaultNetwork={mainnet}>
-        <Component {...pageProps} />
-      </StaticWalletProvider>
-    </SWRConfig>
+    <StaticWalletProvider defaultNetwork={mainnet}>
+      <Component {...pageProps} />
+    </StaticWalletProvider>
   );
 }
 

@@ -8,19 +8,16 @@
     "start": "next start"
   },
   "dependencies": {
-    "@headlessui/react": "^0.3.1",
+    "@headlessui/react": "^0.3.2",
+    "@heroicons/react": "^1.0.4",
     "@terra-money/wallet-provider": "^2.0.0",
     "axios": "^0.21.1",
-    "buffer-layout": "^1.2.2",
+    "bn.js": "^5.2.0",
     "ipfs-http-client": "^52.0.3",
-    "js-sha3": "^0.8.0",
     "next": "^11.1.1",
-    "qrcode.react": "^1.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-number-format": "^4.7.3",
     "react-spinners": "^0.10.6",
-    "swr": "^0.5.7",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { IconMenu, IconX } from './Icons';
 import NavBarButtons from './NavBarButtons';
+import Image from 'next/image';
+import logo from '../public/logo.png'
 
 const CLASSES_TEXT_SELECTED = 'bg-gray-700 text-white px-3 py-2 rounded-md text-sm font-medium';
 const CLASSES_TEXT_NORMAL = 'text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium';
@@ -43,9 +45,8 @@ export default function NavBar() {
   const router = useRouter();
 
   return (
-    <div className="bg-white">
-      <nav className="bg-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-gray-800 w-screen">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="-ml-2 mr-2 flex items-center md:hidden">
@@ -62,6 +63,11 @@ export default function NavBar() {
               </button>
             </div>
             <div className="flex-shrink-0 flex items-center">
+              <Link href="/">
+                <a>
+                  <Image width="50" height="50" src={logo} alt="Licium Logo" />
+                </a>
+              </Link>
               <span className="text-white text-2xl font-thin widest mr-8">
                 <Link href="/">Licium Protocol</Link>
               </span>
@@ -73,13 +79,11 @@ export default function NavBar() {
           <NavBarButtons />
         </div>
       </div>
-
       <div className={ `${ menuOpened ? 'block': 'hidden' } md:hidden` }>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           { renderMenuItems(router.pathname, true) }
         </div>
       </div>
     </nav>
-    </div>
   );
 }
