@@ -4,7 +4,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 import { create } from 'ipfs-http-client';
 import { useConnectedWallet } from '@terra-money/wallet-provider';
 import api from "../lib/api";
-import { getTxUrl} from '../lib/helper';
+import { getIsccComponents, getTxUrl} from '../lib/helper';
 import { mintNft } from "../lib/terra";
 import Button from '../components/Button';
 import NavBar from '../components/NavBar';
@@ -40,17 +40,21 @@ export default function Home() {
   const connectedWallet = useConnectedWallet();
   
   // NFT state
-  const [tokenId, setTokenId] = useState();
-  const [mediaFile, setMediaFile] = useState(null);
-  const [mediaData, setMediaData] = useState(null);
+  const [mediaFile, setMediaFile] = useState("");
+  const [mediaData, setMediaData] = useState("");
   const [mediaPath, setMediaPath] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [owner, setOwner] = useState("");
   const [name, setName] = useState("");
-  const [isccCode, setIsccCode] = useState("");
-  const [tophash, setTophash] = useState("");
   const [description, setDescription] = useState("");
+  const [metaId, setMetaId] = useState("");
+  const [contentId, setContentId] = useState("");
+  const [dataId, setDataId] = useState("");
+  const [instanceId, setInstanceId] = useState("");
+  const [tophash, setTophash] = useState("");
   const [licenseUrl, setLicenseUrl] = useState("");
   const [price, setPrice] = useState("");
-  const [mintTx, setMintTx] = useState(null);
+  const [mintTx, setMintTx] = useState("");
 
   // UI state
   const [mintingNft, setMintingNft] = useState(false);
@@ -75,7 +79,11 @@ export default function Home() {
       formData.append("file", file);
       const response = await api.request({ method: "POST", url, data: formData, headers: { "Content-Type": "multipart/form-data" }});
       const isccData = response.data;
-      setIsccCode(isccData.iscc);
+      const components = getIsccComponents(isccData.iscc);
+      setMetaId(components.metaId);
+      setContentId(components.contentId);
+      setDataId(components.dataId);
+      setInstanceId(components.instanceId);
       setTophash(isccData.tophash);
     } catch (err) {
       console.log(err);
@@ -94,21 +102,27 @@ export default function Home() {
   // Handle file remove
   function onFileRemove(evt) {
     evt.preventDefault();
-    setMediaFile(null);
-    setMediaData(null);
+    setMediaFile("");
+    setMediaData("");
     setMediaPath("");
-    setIsccCode("");
+    setMetaId("");
+    setContentId("");
+    setDataId("");
+    setInstanceId("");
     setTophash("");
   }
 
   function canMint() {
-    return connectedWallet && isccCode && tophash && name && description && mediaPath && licenseUrl && price;
+    return connectedWallet && metaId && contentId && dataId && instanceId && tophash && name && description && mediaPath && licenseUrl && price;
   }
 
   const onSubmit = useCallback(async () => {
     try {
       setMintingNft(true);
-      const result = await mintNft(connectedWallet, isccCode, tophash, name, description, mediaPath, licenseUrl, price);
+      const result = await mintNft(
+        connectedWallet, metaId, contentId, dataId, instanceId, 
+        tophash, name, description, mediaPath, licenseUrl, price
+      );
       setMintingNft(false);
       if (result.result === 'OK') {
         setTokenId(result.tokenId);
@@ -122,27 +136,27 @@ export default function Home() {
     } catch (err) {
       console.log('ERROR: ', err);
     }
-  }, [connectedWallet, isccCode, tophash, name, description, mediaPath, licenseUrl, price]);
+  }, [connectedWallet, metaId, contentId, dataId, instanceId, tophash, name, description, mediaPath, licenseUrl, price]);
 
   return (
     <div>
       <NotificationPanel show={!!successMsg} bgColor="bg-green-400" message={successMsg} />
       <NotificationPanel show={!!errorMsg} bgColor="bg-red-400" message={errorMsg} />
       <NavBar />
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-4xl mx-auto p-8">
         <div className="max-w-7xl mx-auto mb-4">
           <h1 className="text-2xl font-semibold text-gray-900">Mint NFT</h1>
         </div>
         <form onSubmit={onSubmit} className="space-y-8 divide-y divide-gray-200">
           <div className="space-y-8 divide-y divide-gray-200">
             <div>
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                <div className="sm:col-span-6">
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-8">
+                <div className="sm:col-span-8">
                   <label htmlFor="cover-photo" className="block text-sm font-medium text-gray-700">NFT Image</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="mt-1 flex justify-center py-1 border-2 border-gray-300 border-dashed rounded-md">
                     <div className="space-y-1 text-center">
                       { mediaPath ? (
-                        <div className="w-80 h-80 relative">
+                        <div className="w-48 h-48 relative">
                           <Image layout="fill" objectFit="contain" src={mediaPath} />
                         </div>
                       ) : (
@@ -202,7 +216,7 @@ export default function Home() {
                   </div>
                 </div>
                 { tokenId && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="tokenId" className="block text-sm font-medium text-gray-700">Token ID</label>
                     <div className="mt-1">
                       <input 
@@ -216,23 +230,64 @@ export default function Home() {
                     </div>
                   </div> 
                 )}
-                { isccCode && (
-                  <div className="sm:col-span-6">
-                    <label htmlFor="isccCode" className="block text-sm font-medium text-gray-700">ISCC Code</label>
-                    <div className="mt-1">
-                      <input 
-                        id="isccCode"
-                        name="isccCode"
-                        type="text"
-                        value={isccCode}
-                        disabled
-                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      />
+                { contentId && (
+                  <>
+                    <div className="sm:col-span-2 text-xs">
+                      <label htmlFor="metaId" className="block text-sm font-medium text-gray-700">ISCC Code (Meta-ID)</label>
+                      <div className="mt-1">
+                        <input 
+                          id="metaId"
+                          name="metaId"
+                          type="text"
+                          value={metaId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
                     </div>
-                  </div> 
+                    <div className="sm:col-span-2">
+                      <label htmlFor="contentId" className="block text-sm font-medium text-gray-700">Content ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="contentId"
+                          name="contentId"
+                          type="text"
+                          value={contentId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="dataId" className="block text-sm font-medium text-gray-700">Data ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="dataId"
+                          name="dataId"
+                          type="text"
+                          value={dataId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="instanceId" className="block text-sm font-medium text-gray-700">Instance ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="instanceId"
+                          name="instanceId"
+                          type="text"
+                          value={instanceId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </>
                 )}
                 { mediaPath && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">Media URL (IPFS)</label>
                   <div className="mt-1">
                     <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">
@@ -241,9 +296,9 @@ export default function Home() {
                   </div>
                 </div>
                 )}
-                { isccCode && (
+                { contentId && (
                   <>
-                    <div className="sm:col-span-6">
+                    <div className="sm:col-span-8">
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700">Name</label>
                       <div className="mt-1">
                         <input 
@@ -256,7 +311,7 @@ export default function Home() {
                         />
                       </div>
                     </div>
-                    <div className="sm:col-span-6">
+                    <div className="sm:col-span-8">
                       <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
                       <div className="mt-1">
                         <textarea
@@ -269,7 +324,7 @@ export default function Home() {
                         />
                       </div>
                     </div>
-                    <div className="sm:col-span-6">
+                    <div className="sm:col-span-8">
                       <label htmlFor="licenseUrl" className="block text-sm font-medium text-gray-700">License Offer</label>
                       <div className="mt-1">
                           <SelectField
@@ -281,7 +336,7 @@ export default function Home() {
                           />
                       </div>
                     </div>
-                    <div className="sm:col-span-6">
+                    <div className="sm:col-span-8">
                       <label htmlFor="email" className="block text-sm font-medium text-gray-700">License price</label>
                       <div className="mt-1">
                         <input 
@@ -295,7 +350,7 @@ export default function Home() {
                       </div>
                     </div>
                     { mintTx && (
-                      <div className="sm:col-span-6">
+                      <div className="sm:col-span-8">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Mint tx</label>
                         <div className="mt-1">
                           <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">

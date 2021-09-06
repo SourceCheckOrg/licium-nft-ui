@@ -3,7 +3,7 @@ import Image from 'next/image'
 import PulseLoader from "react-spinners/PulseLoader";
 import { useConnectedWallet } from '@terra-money/wallet-provider';
 import api from "../lib/api";
-import { adjustPrice, getTxUrl} from '../lib/helper';
+import { adjustPrice, getIsccComponents ,getTxUrl} from '../lib/helper';
 import { licenseNft, resolveNft } from "../lib/terra";
 import Button from '../components/Button';
 import NavBar from '../components/NavBar';
@@ -17,14 +17,18 @@ export default function License() {
   const connectedWallet = useConnectedWallet();
   
   // nft state
-  const [tokenId, setTokenId] = useState();
-  const [mediaFile, setMediaFile] = useState(null);
-  const [mediaData, setMediaData] = useState(null);
+  const [tokenId, setTokenId] = useState("");
+  const [owner, setOwner] = useState("");
+  const [mediaFile, setMediaFile] = useState("");
+  const [mediaData, setMediaData] = useState("");
   const [mediaPath, setMediaPath] = useState("");
   const [name, setName] = useState("");
-  const [isccCode, setIsccCode] = useState("");
-  const [tophash, setTophash] = useState("");
   const [description, setDescription] = useState("");
+  const [metaId, setMetaId] = useState("");
+  const [contentId, setContentId] = useState("");
+  const [dataId, setDataId] = useState("");
+  const [instanceId, setInstanceId] = useState("");
+  const [tophash, setTophash] = useState("");
   const [licenseUrl, setLicenseUrl] = useState("");
   const [price, setPrice] = useState("");
   const [licenseTx, setLicenseTx] = useState("");
@@ -46,6 +50,7 @@ export default function License() {
     });
 
     let isccData;
+    let components;
    
     try {
       // generate ISCC code
@@ -56,7 +61,11 @@ export default function License() {
       formData.append("file", file);
       const response = await api.request({ method: "POST", url, data: formData, headers: { "Content-Type": "multipart/form-data" }});
       isccData = response.data;
-      setIsccCode(isccData.iscc);
+      components = getIsccComponents(isccData.iscc);
+      setMetaId(components.metaId);
+      setContentId(components.contentId);
+      setDataId(components.dataId);
+      setInstanceId(components.instanceId);
       setTophash(isccData.tophash);
     } catch (err) {
       console.log('err', err);
@@ -64,9 +73,10 @@ export default function License() {
 
     try {
       // resolve NFT
-      const result = await resolveNft(isccData.iscc);
+      const result = await resolveNft(components.contentId);
       if (result) {
         setTokenId(result.token_id);
+        setOwner(result.owner);
         setName(result.name);
         setDescription(result.description);
         setMediaPath(result.image);
@@ -89,21 +99,24 @@ export default function License() {
   // Handle file remove
   function onFileRemove(evt) {
     evt.preventDefault();
-    setTokenId(null)
-    setIsccCode(null);
-    setTophash(null);
-    setMediaFile(null);
-    setMediaData(null);
-    setMediaPath(null);
-    setName(null);
-    setDescription(null);
-    setLicenseUrl(null);
-    setPrice(null);
-    setLicenseTx(null);
+    setTokenId("")
+    setMediaFile("");
+    setMediaData("");
+    setMediaPath("");
+    setName("");
+    setDescription("");
+    setMetaId("");
+    setContentId("");
+    setDataId("");
+    setInstanceId("");
+    setTophash("");
+    setLicenseUrl("");
+    setPrice("");
+    setLicenseTx("");
   }
 
   function canLicense() {
-    return connectedWallet && isccCode && licenseUrl && price;
+    return connectedWallet && tokenId && licenseUrl && price;
   }
 
   const onSubmit = useCallback(async () => {
@@ -133,13 +146,13 @@ export default function License() {
         <form onSubmit={onSubmit} className="space-y-8 divide-y divide-gray-200">
           <div className="space-y-8 divide-y divide-gray-200">
             <div>
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                <div className="sm:col-span-6">
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-8">
+                <div className="sm:col-span-8">
                   <label htmlFor="cover-photo" className="block text-sm font-medium text-gray-700">NFT Image</label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div className="mt-1 flex justify-center py-1 border-2 border-gray-300 border-dashed rounded-md">
                     <div className="space-y-1 text-center">
                       { mediaPath ? (
-                        <div className="w-80 h-80 relative">
+                        <div className="w-48 h-48 relative">
                           <Image layout="fill" objectFit="contain" src={mediaPath} />
                         </div>
                       ) : (
@@ -199,7 +212,7 @@ export default function License() {
                   </div>
                 </div>
                 { tokenId && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Token ID</label>
                     <div className="mt-1">
                       <input 
@@ -213,23 +226,79 @@ export default function License() {
                     </div>
                   </div> 
                 )}
-                { isccCode && (
-                  <div className="sm:col-span-6">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">ISCC Code</label>
+                { owner && (
+                  <div className="sm:col-span-8">
+                    <label htmlFor="owner" className="block text-sm font-medium text-gray-700">Owner (Terra Blockchain)</label>
                     <div className="mt-1">
                       <input 
-                        id="name"
-                        name="name"
+                        id="owner"
+                        name="owner"
                         type="text"
-                        value={isccCode}
+                        value={owner}
                         disabled
                         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
                   </div> 
                 )}
+                { contentId && (
+                  <>
+                    <div className="sm:col-span-2 text-xs">
+                      <label htmlFor="metaId" className="block text-sm font-medium text-gray-700">ISCC Code (Meta-ID)</label>
+                      <div className="mt-1">
+                        <input 
+                          id="metaId"
+                          name="metaId"
+                          type="text"
+                          value={metaId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="contentId" className="block text-sm font-medium text-gray-700">Content ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="contentId"
+                          name="contentId"
+                          type="text"
+                          value={contentId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="dataId" className="block text-sm font-medium text-gray-700">Data ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="dataId"
+                          name="dataId"
+                          type="text"
+                          value={dataId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label htmlFor="instanceId" className="block text-sm font-medium text-gray-700">Instance ID</label>
+                      <div className="mt-1">
+                        <input 
+                          id="instanceId"
+                          name="instanceId"
+                          type="text"
+                          value={instanceId}
+                          disabled
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
                 { mediaPath && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Media URL (IPFS)</label>
                     <div className="mt-1">
                       <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">
@@ -239,7 +308,7 @@ export default function License() {
                   </div>
                 )}
                 { name && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Name</label>
                     <div className="mt-1">
                       <input 
@@ -254,7 +323,7 @@ export default function License() {
                   </div>
                 )}
                 { description && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="about" className="block text-sm font-medium text-gray-700">Description</label>
                     <div className="mt-1">
                       <textarea
@@ -269,7 +338,7 @@ export default function License() {
                   </div>
                 )}
                 { licenseUrl && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">License URL</label>
                     <div className="mt-1">
                       <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">
@@ -279,7 +348,7 @@ export default function License() {
                   </div>
                 )}
                 { price && (
-                  <div className="sm:col-span-6">
+                  <div className="sm:col-span-8">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">License price</label>
                     <div className="mt-1">
                       <input 
