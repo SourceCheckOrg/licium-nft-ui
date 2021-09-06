@@ -41,6 +41,22 @@ export default function License() {
   
   // handle file upload
   async function onFileUpload(evt) {
+    setTokenId("")
+    setOwner("");
+    setMediaFile("");
+    setMediaData("");
+    setMediaPath("");
+    setName("");
+    setDescription("");
+    setMetaId("");
+    setContentId("");
+    setDataId("");
+    setInstanceId("");
+    setTophash("");
+    setLicenseUrl("");
+    setPrice("");
+    setLicenseTx("");
+
     const file = evt.target.files[0];
     setResolvingNft(true);
     setMediaFile(file);
@@ -244,8 +260,11 @@ export default function License() {
                 )}
                 { contentId && (
                   <>
+                    <div className="sm:col-span-8 block text-sm font-bold text-gray-700">
+                      <span>ISCC Codes</span>
+                    </div>
                     <div className="sm:col-span-2 text-xs">
-                      <label htmlFor="metaId" className="block text-sm font-medium text-gray-700">ISCC Code (Meta-ID)</label>
+                      <label htmlFor="metaId" className="block text-sm font-medium text-gray-700">Meta-Code</label>
                       <div className="mt-1">
                         <input 
                           id="metaId"
@@ -258,7 +277,7 @@ export default function License() {
                       </div>
                     </div>
                     <div className="sm:col-span-2">
-                      <label htmlFor="contentId" className="block text-sm font-medium text-gray-700">Content ID</label>
+                      <label htmlFor="contentId" className="block text-sm font-medium text-gray-700">Content-Code</label>
                       <div className="mt-1">
                         <input 
                           id="contentId"
@@ -271,7 +290,7 @@ export default function License() {
                       </div>
                     </div>
                     <div className="sm:col-span-2">
-                      <label htmlFor="dataId" className="block text-sm font-medium text-gray-700">Data ID</label>
+                      <label htmlFor="dataId" className="block text-sm font-medium text-gray-700">Data-Code</label>
                       <div className="mt-1">
                         <input 
                           id="dataId"
@@ -284,7 +303,7 @@ export default function License() {
                       </div>
                     </div>
                     <div className="sm:col-span-2">
-                      <label htmlFor="instanceId" className="block text-sm font-medium text-gray-700">Instance ID</label>
+                      <label htmlFor="instanceId" className="block text-sm font-medium text-gray-700">Instance-Code</label>
                       <div className="mt-1">
                         <input 
                           id="instanceId"
@@ -303,7 +322,7 @@ export default function License() {
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Media URL (IPFS)</label>
                     <div className="mt-1">
                       <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">
-                        <a href={mediaPath}>{mediaPath}</a>
+                        <a target="_blank" href={mediaPath}>{mediaPath}</a>
                       </div>
                     </div>
                   </div>
