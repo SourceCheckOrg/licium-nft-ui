@@ -359,7 +359,7 @@ export default function License() {
                 { resContentId && (
                   <>
                     <div className="sm:col-span-8 block text-sm font-bold text-gray-700">
-                      <span>Resolved NFT ISCC Codes</span>
+                      <span>Original NFT ISCC Codes</span>
                     </div>
                     <div className="sm:col-span-2 text-xs">
                       <label htmlFor="resMetaId" className="block text-sm font-medium text-gray-700">Meta-Code</label>
