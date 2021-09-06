@@ -100,6 +100,7 @@ export default function License() {
   function onFileRemove(evt) {
     evt.preventDefault();
     setTokenId("")
+    setOwner("");
     setMediaFile("");
     setMediaData("");
     setMediaPath("");
