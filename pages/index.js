@@ -10,12 +10,17 @@ import Button from '../components/Button';
 import NavBar from '../components/NavBar';
 import NotificationPanel from '../components/NotificationPanel';
 import SelectField from "../components/SelectField";
+import CID from 'cids';
 
-// ISCC api 
+// ISCC API
 const ISCC_BASE_URL = process.env.NEXT_PUBLIC_ISCC_BASE_URL;
 const ISCC_GENERATE_FROM_FILE_API = process.env.NEXT_PUBLIC_ISCC_GENERATE_FROM_FILE_API;
 
-// IPFS api
+// ISCC v1.1 beta API
+const ISCC_V1_1_BASE_URL = process.env.NEXT_PUBLIC_ISCC_V1_1_BASE_URL;
+const ISCC_V1_1_GEN_FROM_FILE_API = process.env.NEXT_PUBLIC_ISCC_V1_1_GENERATE_FROM_FILE_API;
+
+// IPFS API
 const IPFS_BASE_URL = process.env.NEXT_PUBLIC_IPFS_BASE_URL;
 const IPFS_API = process.env.NEXT_PUBLIC_IPFS_API;
 const ipfsClient = create(`${IPFS_BASE_URL}${IPFS_API}`);
@@ -57,6 +62,7 @@ export default function Home() {
   const [mintTx, setMintTx] = useState("");
 
   // UI state
+  const [useTermsAccepted, setUseTermsAccepted] = useState(false);
   const [mintingNft, setMintingNft] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -77,6 +83,8 @@ export default function Home() {
       name: file.name,
       size: file.size,
     });
+
+    let preview;
     
     try {
       // generate ISCC code
@@ -94,16 +102,34 @@ export default function Home() {
       setInstanceId(components.instanceId);
       setTophash(isccData.tophash);
     } catch (err) {
-      console.log(err);
+      setErrorMsg("Error generating ISCC code for the image!");
+      setTimeout(() => setErrorMsg(null), 3000);
     }
 
     try {
-      // upload file to IPFS
-      const uploadedFile = await ipfsClient.add(file)
-      const uploadedPath = `https://ipfs.infura.io/ipfs/${uploadedFile.path}`;
-      setMediaPath(uploadedPath);
+      // generate image thumbnail
+      const url = `${ISCC_V1_1_BASE_URL}${ISCC_V1_1_GEN_FROM_FILE_API}`;
+      const data = { title: name };
+      const formData = new FormData();
+      formData.append("data", JSON.stringify(data));
+      formData.append("file", file);
+      const response = await api.request({ method: "POST", url, data: formData, headers: { "Content-Type": "multipart/form-data" }});
+      preview = response.data.preview;
     } catch (err) {
-      console.log(err);
+      setErrorMsg("Error generating thumbnail of the image!");
+      setTimeout(() => setErrorMsg(null), 3000);
+    }
+
+    try {
+      const fetchedPreview = await fetch(preview);
+      const blob = await fetchedPreview.blob();
+      const thumbnailFile = new File ([blob], file.name, { type: "image/webp" });
+      const uploadedFile = await ipfsClient.add(thumbnailFile);
+      let v1Cid = new CID(uploadedFile.path).toV1().toString('base32');
+      setMediaPath(`https://${v1Cid}.ipfs.infura-ipfs.io`);
+    } catch (err) {
+      setErrorMsg("Error storing thumbnail of the image!");
+      setTimeout(() => setErrorMsg(null), 3000);
     }
   }
 
@@ -121,7 +147,10 @@ export default function Home() {
   }
 
   function canMint() {
-    return connectedWallet && metaId && contentId && dataId && instanceId && tophash && name && description && mediaPath && licenseUrl && price;
+    return  connectedWallet && metaId && contentId && dataId && 
+            instanceId && tophash && name && description && 
+            mediaPath && licenseUrl && price && !mintTx && 
+            useTermsAccepted;
   }
 
   const onSubmit = useCallback(async () => {
@@ -164,8 +193,8 @@ export default function Home() {
                   <div className="mt-1 flex justify-center py-1 border-2 border-gray-300 border-dashed rounded-md">
                     <div className="space-y-1 text-center">
                       { mediaPath ? (
-                        <div className="w-48 h-48 relative">
-                          <Image layout="fill" objectFit="contain" src={mediaPath} />
+                        <div className="p-3 relative">
+                          <img className="inline-block" src={mediaPath} />
                         </div>
                       ) : (
                         <svg
@@ -370,8 +399,24 @@ export default function Home() {
                         </div>
                       </div>
                     )}
+                   
                   </>
                 )}
+                 <div className="sm:col-span-8">
+                    <input type="checkbox"  className="mr-2" name="useTermsAccepted" 
+                      onClick={() => setUseTermsAccepted(!useTermsAccepted)}
+                    />
+                    <label htmlFor="terms" className="text-xs font-medium text-gray-700">
+                        This Licium demo is for testing purposes only and pre-alpha! By using the app you accept the 
+                        <a
+                          className="ml-1 text-indigo-500 font-bold" 
+                          target="_blank" 
+                          href="https://github.com/licium/spacecamp/blob/main/how-to-use-the-demo.md#terms--conditions"
+                        > 
+                          terms and condition
+                        </a>
+                    </label>
+                  </div>
               </div>
             </div>
           </div>
@@ -382,7 +427,7 @@ export default function Home() {
                 <PulseLoader color="white" loading={mintingNft} size={9} />
               </div>
             ) : (
-              <Button label="Mint NFT" color="indigo" onClick={onSubmit} disabled={mintTx || !canMint()}/>
+              <Button label="Mint NFT" color="indigo" onClick={onSubmit} disabled={!canMint()}/>
             )}
             </div>
           </div>
