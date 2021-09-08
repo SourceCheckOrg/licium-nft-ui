@@ -38,6 +38,7 @@ export default function License() {
   const [licenseTx, setLicenseTx] = useState("");
 
   // ui state
+  const [useTermsAccepted, setUseTermsAccepted] = useState(false);
   const [resolvingNft, setResolvingNft] = useState(false);
   const [licensingNft, setLicensingNft] = useState(false);
   const [successMsg, setSuccessMsg] = useState(null);
@@ -149,7 +150,7 @@ export default function License() {
   }
 
   function canLicense() {
-    return connectedWallet && tokenId && licenseUrl && price;
+    return connectedWallet && tokenId && licenseUrl && price && useTermsAccepted;
   }
 
   function getBorderColor(code) {
@@ -208,8 +209,8 @@ export default function License() {
                   <div className="mt-1 flex justify-center py-1 border-2 border-gray-300 border-dashed rounded-md">
                     <div className="space-y-1 text-center">
                       { mediaPath ? (
-                        <div className="w-48 h-48 relative">
-                          <Image layout="fill" objectFit="contain" src={mediaPath} />
+                        <div className="p-3 relative">
+                         <img className="inline-block" src={mediaPath} />
                         </div>
                       ) : (
                         <svg
@@ -490,6 +491,21 @@ export default function License() {
                     </div>
                   </div>
                 )}
+                <div className="sm:col-span-8">
+                    <input type="checkbox"  className="mr-2" name="useTermsAccepted" 
+                      onClick={() => setUseTermsAccepted(!useTermsAccepted)}
+                    />
+                    <label htmlFor="terms" className="text-xs font-medium text-gray-700">
+                        This Licium demo is for testing purposes only and pre-alpha! By using the app you accept the 
+                        <a
+                          className="ml-1 text-indigo-500 font-bold" 
+                          target="_blank" 
+                          href="https://github.com/licium/spacecamp/blob/main/how-to-use-the-demo.md#terms--conditions"
+                        > 
+                          terms and condition
+                        </a>
+                    </label>
+                  </div>
               </div>
             </div>
           </div>
