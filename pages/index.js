@@ -40,6 +40,11 @@ const licenseOptions = [
   }
 ]
 
+function visibleUrl(url) {
+  return url.substr(0, 30) + ' ... ' + url.substr(url.length - 30);
+}
+
+
 export default function Home() {
   const connectedWallet = useConnectedWallet();
   
@@ -351,7 +356,7 @@ export default function Home() {
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">Media URL (IPFS)</label>
                   <div className="mt-1">
                     <div className="border border-gray-300 rounded-md text-sm text-indigo-500 px-3 py-2">
-                      <a target="_blank" href={mediaPath}>{mediaPath}</a>
+                      <a target="_blank" href={mediaPath}>{visibleUrl(mediaPath)}</a>
                     </div>
                   </div>
                 </div>
