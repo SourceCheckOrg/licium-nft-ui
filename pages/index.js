@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import Image from 'next/image'
 import PulseLoader from "react-spinners/PulseLoader";
 import { create } from 'ipfs-http-client';
 import { useConnectedWallet } from '@terra-money/wallet-provider';
@@ -49,7 +48,6 @@ export default function Home() {
   const [mediaData, setMediaData] = useState("");
   const [mediaPath, setMediaPath] = useState("");
   const [tokenId, setTokenId] = useState("");
-  const [owner, setOwner] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [metaId, setMetaId] = useState("");
@@ -83,9 +81,10 @@ export default function Home() {
       name: file.name,
       size: file.size,
     });
+  }
 
-    let preview;
-    
+  async function onSend() {
+    const file = mediaFile;
     try {
       // generate ISCC code
       const url = `${ISCC_BASE_URL}${ISCC_GENERATE_FROM_FILE_API}`;
@@ -105,6 +104,8 @@ export default function Home() {
       setErrorMsg("Error generating ISCC code for the image!");
       setTimeout(() => setErrorMsg(null), 3000);
     }
+
+    let preview;
 
     try {
       // generate image thumbnail
@@ -251,6 +252,25 @@ export default function Home() {
                       )}
                     </div>
                   </div>
+                </div>
+                <div className="sm:col-span-8">
+                  <input 
+                    type="checkbox"  
+                    className="mr-2" 
+                    name="useTermsAccepted" 
+                    checked={useTermsAccepted}
+                    onChange={() => setUseTermsAccepted(!useTermsAccepted)}
+                  />
+                  <label htmlFor="terms" className="text-xs font-medium text-gray-700">
+                      This Licium demo is for testing purposes only and pre-alpha! By using the app you accept the 
+                      <a
+                        className="ml-1 text-indigo-500 font-bold" 
+                        target="_blank" 
+                        href="https://github.com/licium/spacecamp/blob/main/how-to-use-the-demo.md#terms--conditions"
+                      > 
+                        terms and condition
+                      </a>
+                  </label>
                 </div>
                 { tokenId && (
                   <div className="sm:col-span-8">
@@ -402,32 +422,23 @@ export default function Home() {
                    
                   </>
                 )}
-                 <div className="sm:col-span-8">
-                    <input type="checkbox"  className="mr-2" name="useTermsAccepted" 
-                      onClick={() => setUseTermsAccepted(!useTermsAccepted)}
-                    />
-                    <label htmlFor="terms" className="text-xs font-medium text-gray-700">
-                        This Licium demo is for testing purposes only and pre-alpha! By using the app you accept the 
-                        <a
-                          className="ml-1 text-indigo-500 font-bold" 
-                          target="_blank" 
-                          href="https://github.com/licium/spacecamp/blob/main/how-to-use-the-demo.md#terms--conditions"
-                        > 
-                          terms and condition
-                        </a>
-                    </label>
-                  </div>
               </div>
             </div>
           </div>
           <div className="pt-5">
             <div className="flex justify-center">
-            {mintingNft ? (
+            { !mediaPath && (
+              <div className="sm:col-span-8 flex justify-center">
+                <Button label="Send" color="indigo" disabled={!mediaFile || !useTermsAccepted} onClick={() => onSend()}/>  
+              </div>
+            )}
+            { mediaPath && !mintingNft && (
+              <Button label="Mint NFT" color="indigo" onClick={onSubmit} disabled={!canMint()}/>
+            )}
+            { mintingNft && (
               <div className="inline-block text-center py-2 px-2 border border-transparent shadow-sm rounded-md h-10 w-20 bg-indigo-600 hover:bg-indigo-700">
                 <PulseLoader color="white" loading={mintingNft} size={9} />
               </div>
-            ) : (
-              <Button label="Mint NFT" color="indigo" onClick={onSubmit} disabled={!canMint()}/>
             )}
             </div>
           </div>
